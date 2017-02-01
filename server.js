@@ -1,5 +1,6 @@
 var express = require('express');
 var app = express();
+var fs = require('fs');
 
 // set the port of our application
 // process.env.PORT lets the port be set by Heroku
@@ -22,6 +23,14 @@ app.get('/user', function(req, res) {
 
 	// ejs render automatically looks in the views folder
 	res.render('user');
+});
+
+app.get('/logo.png', function(req, res) {
+
+	// ejs render automatically looks in the views folder
+	fileToLoad = fs.readFileSync("logo.png");
+    res.writeHead(200, {'Content-Type':  'image/png' });
+    res.end(fileToLoad, 'binary');
 });
 
 app.listen(port, function() {

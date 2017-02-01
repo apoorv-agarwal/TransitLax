@@ -41,7 +41,10 @@
           const auth = firebase.auth();
           const promise = auth.signInWithEmailAndPassword(email, pass);
           promise.catch(e => console.log(e.message));
-          window.location.href = "../user?"+email+"&"+pass;
+          if(e.message){
+          	alert(e.message);
+          }
+          //window.location.href = "../user?"+email+"&"+pass;
         });
 
         btnSignUp.addEventListener('click', e => {
@@ -49,8 +52,23 @@
           const pass = txtPassword.value;
           const auth = firebase.auth();
           const promise = auth.createUserWithEmailAndPassword(email,pass);
-          promise.catch = console.log(e.message);
-          window.location.href = "../user?"+email+"&"+pass;
+          promise.catch = console.log("Apoorv"+e.message);
+          if(e.message){
+          	alert(e.message);
+          }
+          //window.location.href = "../user?"+email+"&"+pass;
+        });
+
+         firebase.auth().onAuthStateChanged(firebaseUser => {
+          if(firebaseUser) {
+          	const email = txtEmail.value;
+            const pass = txtPassword.value;
+            console.log(firebaseUser);
+            window.location.href = "../user?"+email+"&"+pass;
+          } else {
+            console.log('not logged in');
+            //alert ("Not Logged In");
+          }
         });
   	}
   </script>
