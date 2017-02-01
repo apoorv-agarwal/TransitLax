@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Geolocation</title>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/3.6.7/firebase.js"></script>
+  <script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyCu8WvdPeKB1BdZpZXy00NLVJSXVCjReu8",
+    authDomain: "maps-7e403.firebaseapp.com",
+    databaseURL: "https://maps-7e403.firebaseio.com",
+    storageBucket: "maps-7e403.appspot.com",
+    messagingSenderId: "377991669313"
+  };
+  firebase.initializeApp(config);
+  </script> 
+
+	<!-- CSS -->
+	<!-- load bootstrap and our own personal stylesheet -->
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/superhero/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+    <div class="container">
+      
+      <button id="btnLogOut" class="btn btn-secondary">Log Out</button>
+      </div>
+    <div id="map"></div>
+    <script>
+      // Note: This example requires that you consent to location sharing when
+      // prompted by your browser. If you see the error "The Geolocation service
+      // failed.", it means you probably did not give permission for the browser to
+      // locate you.
+
+      function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: -34.397, lng: 150.644},
+          zoom: 16
+        });
+        var infoWindow = new google.maps.InfoWindow({map: map});
+        var marker = null;
+        var domain = document.location.href;
+        params = domain.split('?')[1].split('&');
+        const re_email = params[0];
+        const re_pass = params[1];
+        //alert(re_email);
+        const auth = firebase.auth();
+        const promise = auth.signInWithEmailAndPassword(re_email, re_pass);
+        promise.catch(e => console.log(e.message));
+
+        // const txtEmail = document.getElementById("txtEmail");
+        // const txtPassword = document.getElementById("txtPassword");
+        // const btnLogin = document.getElementById("btnLogin");
+        // const btnSignUp = document.getElementById("btnSignUp");
+        const btnLogOut = document.getElementById("btnLogOut");
+
+        // btnLogin.addEventListener('click', e =>{
+        //   const email = txtEmail.value;
+        //   const pass = txtPassword.value;
+        //   const auth = firebase.auth();
+        //   const promise = auth.signInWithEmailAndPassword(email, pass);
+        //   promise.catch(e => console.log(e.message));
+        // });
+
+        // btnSignUp.addEventListener('click', e => {
+        //   const email = txtEmail.value;
+        //   const pass = txtPassword.value;
+        //   const auth = firebase.auth();
+        //   const promise = auth.createUserWithEmailAndPassword(email,pass);
+        //   promise.catch = console.log(e.message);
+        // });
+
+        btnLogOut.addEventListener('click',e => {
+          const auth = firebase.auth();
+          const promise = auth.signOut();
+          promise.catch = console.log(e.message);
+          window.location.href = "../";
+        });
+
+        firebase.auth().onAuthStateChanged(firebaseUser => {
+          if(firebaseUser) {
+            console.log(firebaseUser);
+            autoUpdate();
+          } else {
+            console.log('not logged in');
+            //alert ("Not Logged In");
+          }
+        });
+
+
+
+
+
+        
+
+
+        
+      function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+        infoWindow.setPosition(pos);
+        infoWindow.setContent(browserHasGeolocation ?
+                              'Error: The Geolocation service failed.' :
+                              'Error: Your browser doesn\'t support geolocation.');
+      }
+
+      function autoUpdate(){
+        // Try HTML5 geolocation.
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+
+            newPoint = new google.maps.LatLng(position.coords.latitude, 
+                                          position.coords.longitude);
+
+            infoWindow.setPosition(pos);
+            infoWindow.setContent('Location found.');
+            map.setCenter(pos);
+
+            var user = firebase.auth().currentUser;
+
+            if(user){
+              var userId = firebase.auth().currentUser.uid;
+
+            var user_data = {
+              userid: userId,
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+
+
+            if (marker) {
+              // Marker already created - Move it
+              marker.setPosition(newPoint);
+            }
+            else {
+              // Marker does not exist - Create it
+              marker = new google.maps.Marker({
+                position: newPoint,
+                map: map
+              });
+            }
+
+            //var currentPos = firebase.database().ref().child('object');
+             var ref = firebase.database().ref().child('users').child(userId).set(user_data, function(err) {
+              if (err) {  // Data was not written to firebase.
+                console.warn(err);
+              }
+
+
+
+            });
+            }
+
+
+
+            
+          }, function() {
+            handleLocationError(true, infoWindow, map.getCenter());
+          });
+        } else {
+          // Browser doesn't support Geolocation
+          handleLocationError(false, infoWindow, map.getCenter());
+        }
+        // Call the autoUpdate() function every 5 seconds
+        setTimeout(autoUpdate, 5000);
+      }
+
+      }
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDRPErZBEeynTUVCsh1LKnKZrEIbMeAabs&callback=initMap">
+    </script>
+  </body>
+</html>

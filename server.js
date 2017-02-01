@@ -18,6 +18,12 @@ app.get('/', function(req, res) {
 	res.render('index');
 });
 
+app.get('/user', function(req, res) {
+
+	// ejs render automatically looks in the views folder
+	res.render('user');
+});
+
 app.listen(port, function() {
 	console.log('Our app is running on http://localhost:' + port);
 });
